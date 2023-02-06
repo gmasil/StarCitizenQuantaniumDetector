@@ -1,5 +1,7 @@
 #include <LedControl.h>
 
+#define RESET 2
+
 #define DIN 15
 #define CLK 16
 #define CS 14
@@ -12,8 +14,8 @@ int timeSeconds = 0;
 bool displayOn = false;
 int blinkCount = MAXBLINK;
 
-
 void setup() {
+  pinMode(RESET, INPUT_PULLUP);
   lc.shutdown(0, false);
   lc.setIntensity(0, 7);
   lc.clearDisplay(0);
@@ -21,6 +23,10 @@ void setup() {
 }
 
 void loop() {
+  // reset button
+  if (digitalRead(RESET) == LOW) {
+    resetTime();
+  }
   // serial
   if (Serial.available() > 0) {
     String data = Serial.readStringUntil(';');
@@ -63,6 +69,13 @@ void setNewTime(int timeS) {
   timeSeconds = timeS;
   displayOn = true;
   blinkCount = 0;
+}
+
+void resetTime() {
+  timeSeconds = -1;
+  displayOn = false;
+  blinkCount = MAXBLINK;
+  lc.clearDisplay(0);
 }
 
 void printTime(int timeS) {
